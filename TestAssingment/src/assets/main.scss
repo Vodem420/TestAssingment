@@ -1,0 +1,37 @@
+@import './base.css';
+
+* {
+  box-sizing: border-box;
+}
+#app{
+  height: 100%;
+  width: 100%;
+}
+html{
+  height: 100%;
+  font-size: 62.5%;
+}
+body{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #828282;
+  font-size: 1.6rem;
+  height: 100%;
+}
+header{
+  height: 6rem;
+  position: fixed;
+  width: 100%;
+  background: #474747;
+}
+.headerFix{
+  height: 6rem;
+}
+footer{
+  position: absolute;
+  bottom: 0;
+  height: 27rem;
+  width: 100%;
+  background: #474747;
+}
