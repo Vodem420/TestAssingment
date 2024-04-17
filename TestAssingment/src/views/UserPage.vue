@@ -4,10 +4,15 @@ import { useLoginStore } from './../stores/loginStore';
 import { useTodoStore } from './../stores/todoStore';
 
 const loginStore = useLoginStore();
+loginStore.getUsers();
 const todoStore = useTodoStore();
 todoStore.getTodos(loginStore.currentUser.id);
+todoStore.getAllTodos();
+
+const allUsers = ref(loginStore.users);
 
 const filter = ref('all');
+const filterByUsers = ref('');
 const searchItem = ref('');
 
 const filteredBySearch = computed(() => {
@@ -31,19 +36,30 @@ const filteredByFilter = computed(() => {
 });
 
 const filteredTodos = computed(() => {
-    if (searchItem.value.trim() === '') {
-        return filteredByFilter.value;
+    let todosToFilter = [];
+
+    if (filterByUsers.value === 'all') {
+        todosToFilter = todoStore.allTodos;
+    } else if (filterByUsers.value === '') {
+        todosToFilter = todoStore.todos.filter(todo => todo.userId === loginStore.currentUser.id);
     } else {
-        return filteredBySearch.value.filter(todo => {
-            if (filter.value === 'completed') {
-                return todo.completed;
-            } else if (filter.value === 'uncompleted') {
-                return !todo.completed;
-            } else {
-                return true;
-            }
-        });
+        todosToFilter = todoStore.todos.filter(todo => todo.userId === filterByUsers.value);
     }
+
+    if (searchItem.value.trim() !== '') {
+        todosToFilter = todosToFilter.filter(todo => todo.title.toLowerCase().includes(searchItem.value.trim().toLowerCase()));
+    }
+
+    if (filter.value === 'completed') {
+        return todosToFilter.filter(todo => todo.completed);
+    } else if (filter.value === 'uncompleted') {
+        return todosToFilter.filter(todo => !todo.completed);
+    } else if (filter.value === 'favorites') {
+        const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+        return todosToFilter.filter(todo => favorites.includes(todo.id));
+    }
+
+    return todosToFilter;
 });
 
 const addToFavorites = (id) => {
@@ -86,6 +102,11 @@ const isFavorite = (id) => {
                 <option value="uncompleted">Uncompleted</option>
                 <option value="favorites">Favorites</option>
             </select>
+            <select v-model="filterByUsers">
+                <option value="">Default</option>
+                <option value="all">Get all todos</option>
+                <option v-for="user in allUsers" :key="user.id" :value="user.id">{{ user.name }}</option>
+            </select>
         </div>
     </div>
     <div v-if="filteredTodos.length" class="todoList">
@@ -98,7 +119,7 @@ const isFavorite = (id) => {
     </div>
     <p v-else class="todoList__placeholder">No todos found.</p>
  </div>
-</template>
+ </template>
 
 <style scoped lang="scss">
 .userInfo{
@@ -184,6 +205,20 @@ pre{
             border: none;
             outline: none;
             cursor: pointer;
+        }
+    }
+    &__filters{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 3rem;
+        select{
+            width: 20rem;
+            padding: 1rem;
+            border: none;
+            border-radius: 2rem;
+            outline: none;
         }
     }
     &__item{
