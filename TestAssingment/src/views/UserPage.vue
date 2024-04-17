@@ -15,26 +15,6 @@ const filter = ref('all');
 const filterByUsers = ref('');
 const searchItem = ref('');
 
-const filteredBySearch = computed(() => {
-    const searchItemLower = searchItem.value.trim().toLowerCase();
-    return todoStore.todos.filter(todo => todo.title.toLowerCase().includes(searchItemLower));
-});
-
-const filteredByFilter = computed(() => {
-    let filtered = todoStore.todos;
-
-    if (filter.value === 'completed') {
-        filtered = filtered.filter(todo => todo.completed);
-    } else if (filter.value === 'uncompleted') {
-        filtered = filtered.filter(todo => !todo.completed);
-    } else if (filter.value === 'favorites') {
-        const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-        filtered = filtered.filter(todo => favorites.includes(todo.id));
-    }
-
-    return filtered;
-});
-
 const filteredTodos = computed(() => {
     let filtered = [];
 
