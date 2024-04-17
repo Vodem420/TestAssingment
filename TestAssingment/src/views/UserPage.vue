@@ -36,30 +36,30 @@ const filteredByFilter = computed(() => {
 });
 
 const filteredTodos = computed(() => {
-    let todosToFilter = [];
+    let filtered = [];
 
     if (filterByUsers.value === 'all') {
-        todosToFilter = todoStore.allTodos;
-    } else if (filterByUsers.value === '') {
-        todosToFilter = todoStore.todos.filter(todo => todo.userId === loginStore.currentUser.id);
+        filtered = todoStore.allTodos;
+    } else if(filterByUsers.value === ''){
+        filtered = todoStore.todos.filter(todo => todo.userId === loginStore.currentUser.id);
     } else {
-        todosToFilter = todoStore.todos.filter(todo => todo.userId === filterByUsers.value);
+        filtered = todoStore.allTodos.filter(todo => todo.userId === parseInt(filterByUsers.value));
     }
 
     if (searchItem.value.trim() !== '') {
-        todosToFilter = todosToFilter.filter(todo => todo.title.toLowerCase().includes(searchItem.value.trim().toLowerCase()));
+        filtered = filtered.filter(todo => todo.title.toLowerCase().includes(searchItem.value.trim().toLowerCase()));
     }
 
     if (filter.value === 'completed') {
-        return todosToFilter.filter(todo => todo.completed);
+        filtered = filtered.filter(todo => todo.completed);
     } else if (filter.value === 'uncompleted') {
-        return todosToFilter.filter(todo => !todo.completed);
+        filtered = filtered.filter(todo => !todo.completed);
     } else if (filter.value === 'favorites') {
         const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-        return todosToFilter.filter(todo => favorites.includes(todo.id));
+        filtered = filtered.filter(todo => favorites.includes(todo.id));
     }
 
-    return todosToFilter;
+    return filtered;
 });
 
 const addToFavorites = (id) => {
@@ -103,7 +103,7 @@ const isFavorite = (id) => {
                 <option value="favorites">Favorites</option>
             </select>
             <select v-model="filterByUsers">
-                <option value="">Default</option>
+                <option value="" selected>CurrentUser</option>
                 <option value="all">Get all todos</option>
                 <option v-for="user in allUsers" :key="user.id" :value="user.id">{{ user.name }}</option>
             </select>
