@@ -62,6 +62,64 @@ const filteredTodos = computed(() => {
     return filtered;
 });
 
+const addTodo = () => {
+    // Получаем значения из полей ввода
+    const userId = document.querySelector('.todoList__head input[placeholder="UserID"]').value;
+    const title = document.querySelector('.todoList__head input[placeholder="Title"]').value;
+
+    // Проверяем, что оба поля заполнены
+    if (userId.trim() !== '' && title.trim() !== '') {
+      // Создаем новый туду
+      const newTodo = {
+        userId: parseInt(userId), // Преобразуем userId в число
+        title: title,
+        completed: false // Предполагаем, что новый туду не завершен
+      };
+
+      // Добавляем новый туду в массив todos в объекте todoStore
+      todoStore.todos.push(newTodo);
+
+      // Обновляем отфильтрованный массив filteredTodos
+      updateFilteredTodos();
+    } else {
+      // Выводим сообщение об ошибке, если не все поля заполнены
+      alert('Please fill in both UserID and Title fields.');
+    }
+  };
+
+  const updateFilteredTodos = () => {
+    // Обновляем отфильтрованный массив на основе текущих фильтров и поискового запроса
+    filteredTodos.value = filteredTodos.value.filter(todo => {
+      let matchFilter = true;
+
+      // Применяем фильтр по статусу завершенности
+      if (filter.value === 'completed') {
+        matchFilter = todo.completed;
+      } else if (filter.value === 'uncompleted') {
+        matchFilter = !todo.completed;
+      } else if (filter.value === 'favorites') {
+        const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+        matchFilter = favorites.includes(todo.id);
+      }
+
+      // Применяем фильтр по пользователю
+      if (filterByUsers.value === 'all') {
+        // Ничего не меняем
+      } else if (filterByUsers.value === '') {
+        matchFilter = matchFilter && todo.userId === loginStore.currentUser.id;
+      } else {
+        matchFilter = matchFilter && todo.userId === parseInt(filterByUsers.value);
+      }
+
+      // Применяем фильтр по поисковому запросу
+      if (searchItem.value.trim() !== '') {
+        matchFilter = matchFilter && todo.title.toLowerCase().includes(searchItem.value.trim().toLowerCase());
+      }
+
+      return matchFilter;
+    });
+  };
+
 const addToFavorites = (id) => {
   const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
   if (!favorites.includes(id)) {
@@ -92,8 +150,9 @@ const isFavorite = (id) => {
     <div class="todoList__wrapper">
         <h1>TODOS</h1>
         <div class="todoList__head">
-            <input type="text" placeholder="addTODO">
-            <button>ADD</button>
+            <input type="text" placeholder="UserID">
+            <input type="text" placeholder="Title">
+            <button @click="addTodo">ADD</button>
         </div>
         <div class="todoList__filters">
             <select v-model="filter">
@@ -111,9 +170,9 @@ const isFavorite = (id) => {
     </div>
     <div v-if="filteredTodos.length" class="todoList">
         <div v-for="item in filteredTodos" :key="item.id" class="todoList__item">
-            <span>userId: {{ item.userId }} id: {{ item.id }}</span>
-            <h3>{{ item.title }}</h3>
-            <p>Completed: {{ item.completed }}</p>
+            <span v-if="item.userId || item.id">userId: {{ item.userId }} id: {{ item.id }}</span>
+            <h3 v-if="item.title">{{ item.title }}</h3>
+            <p v-if="item.completed">Completed: {{ item.completed }}</p>
             <button @click="addToFavorites(item.id)" :disabled="isFavorite(item.id)">Add to favorites</button>
         </div>
     </div>
