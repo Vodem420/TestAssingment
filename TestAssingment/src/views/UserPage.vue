@@ -72,6 +72,7 @@ const addTodo = () => {
       // Создаем новый туду
       const newTodo = {
         userId: parseInt(userId), // Преобразуем userId в число
+        id: Math.floor(Math.random() * 1000) + 1,
         title: title,
         completed: false // Предполагаем, что новый туду не завершен
       };
