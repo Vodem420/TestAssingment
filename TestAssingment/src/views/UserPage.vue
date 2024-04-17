@@ -43,37 +43,28 @@ const filteredTodos = computed(() => {
 });
 
 const addTodo = () => {
-    // Получаем значения из полей ввода
     const userId = document.querySelector('.todoList__head input[placeholder="UserID"]').value;
     const title = document.querySelector('.todoList__head input[placeholder="Title"]').value;
 
-    // Проверяем, что оба поля заполнены
     if (userId.trim() !== '' && title.trim() !== '') {
-      // Создаем новый туду
       const newTodo = {
-        userId: parseInt(userId), // Преобразуем userId в число
+        userId: parseInt(userId),
         id: Math.floor(Math.random() * 1000) + 1,
         title: title,
-        completed: false // Предполагаем, что новый туду не завершен
+        completed: false
       };
-
-      // Добавляем новый туду в массив todos в объекте todoStore
       todoStore.todos.push(newTodo);
 
-      // Обновляем отфильтрованный массив filteredTodos
       updateFilteredTodos();
     } else {
-      // Выводим сообщение об ошибке, если не все поля заполнены
       alert('Please fill in both UserID and Title fields.');
     }
   };
 
   const updateFilteredTodos = () => {
-    // Обновляем отфильтрованный массив на основе текущих фильтров и поискового запроса
     filteredTodos.value = filteredTodos.value.filter(todo => {
       let matchFilter = true;
 
-      // Применяем фильтр по статусу завершенности
       if (filter.value === 'completed') {
         matchFilter = todo.completed;
       } else if (filter.value === 'uncompleted') {
@@ -83,16 +74,13 @@ const addTodo = () => {
         matchFilter = favorites.includes(todo.id);
       }
 
-      // Применяем фильтр по пользователю
       if (filterByUsers.value === 'all') {
-        // Ничего не меняем
+
       } else if (filterByUsers.value === '') {
         matchFilter = matchFilter && todo.userId === loginStore.currentUser.id;
       } else {
         matchFilter = matchFilter && todo.userId === parseInt(filterByUsers.value);
       }
-
-      // Применяем фильтр по поисковому запросу
       if (searchItem.value.trim() !== '') {
         matchFilter = matchFilter && todo.title.toLowerCase().includes(searchItem.value.trim().toLowerCase());
       }
@@ -205,7 +193,8 @@ pre{
     margin: 5rem auto 0;
     padding-bottom: 20rem;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    justify-content: center;
     gap: 2rem;
     &__wrapper{
         h1{
